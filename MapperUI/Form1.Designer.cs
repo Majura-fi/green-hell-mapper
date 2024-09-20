@@ -121,7 +121,7 @@ partial class Form1
         factorInputY.Name = "factorInputY";
         factorInputY.Size = new Size(120, 23);
         factorInputY.TabIndex = 8;
-        factorInputY.Value = new decimal(new int[] { 274, 0, 0, 131072 });
+        factorInputY.Value = new decimal(new int[] { 274, 0, 0, -2147352576 });
         factorInputY.ValueChanged += TweakValueChanged;
         // 
         // label3
@@ -171,7 +171,7 @@ partial class Form1
         offsetInputY.Name = "offsetInputY";
         offsetInputY.Size = new Size(120, 23);
         offsetInputY.TabIndex = 3;
-        offsetInputY.Value = new decimal(new int[] { 1339, 0, 0, int.MinValue });
+        offsetInputY.Value = new decimal(new int[] { 5310, 0, 0, 0 });
         offsetInputY.ValueChanged += TweakValueChanged;
         // 
         // offsetInputX
@@ -182,7 +182,7 @@ partial class Form1
         offsetInputX.Name = "offsetInputX";
         offsetInputX.Size = new Size(120, 23);
         offsetInputX.TabIndex = 2;
-        offsetInputX.Value = new decimal(new int[] { 111, 0, 0, int.MinValue });
+        offsetInputX.Value = new decimal(new int[] { 108, 0, 0, int.MinValue });
         offsetInputX.ValueChanged += TweakValueChanged;
         // 
         // menuStrip1
