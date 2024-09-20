@@ -7,3 +7,11 @@
 /UDPClientTest/bin
 /UDPClientTest/obj
 MapperSource/post-build.bat
+MapperSource/Libs/0Harmony.dll
+MapperSource/Libs/Assembly-CSharp-firstpass.dll
+MapperSource/Libs/Assembly-CSharp.dll
+MapperSource/Libs/UnityEngine.CoreModule.dll
+MapperSource/Libs/UnityEngine.dll
+MapperSource/Libs/UnityEngine.IMGUIModule.dll
+MapperSource/Libs/UnityEngine.UI.dll
+MapperSource/Libs/UnityModManager.dll

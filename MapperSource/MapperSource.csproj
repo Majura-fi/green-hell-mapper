@@ -10,28 +10,28 @@
 
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\GH_Data\Managed\UnityModManager\0Harmony.dll</HintPath>
+      <HintPath>Libs\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\GH_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>Libs\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\GH_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>Libs\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\GH_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>Libs\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\GH_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>Libs\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>..\..\..\GH_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>Libs\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\GH_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>Libs\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityModManager">
-      <HintPath>..\..\..\GH_Data\Managed\UnityModManager\UnityModManager.dll</HintPath>
+      <HintPath>Libs\UnityModManager.dll</HintPath>
     </Reference>
   </ItemGroup>
 

@@ -33,3 +33,17 @@ While orienteering in **Green Hell** is an enjoyable challenge, sometimes you ju
 - Start **Green Hell** and ensure the plugin is active.
 - Open the Mapper UI software to view your live position on the map.
 - The plugin will automatically log your coordinates in `coordinates.txt`.
+
+## Compiling the project
+
+Make sure that you add following files to the **MapperSource/Libs** folder or update references to them:
+- Unity Mod Manager
+  - 0Harmony.dll
+  - UnityModManager.dll
+- Green Hell
+  - Assembly-CSharp.dll
+  - Assembly-CSharp-firstpass.dll
+  - UnityEngine.dll
+  - UnityEngine.CoreModule.dll
+  - UnityEngine.IMGUIModule.dll
+  - UnityEngine.UI.dll
