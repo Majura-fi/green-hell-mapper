@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Text.Json.Serialization;
 using MapperUI.Properties;
+using Microsoft.VisualBasic.Devices;
 using Newtonsoft.Json;
 
 namespace MapperUI;
@@ -17,11 +18,18 @@ public partial class Form1 : Form
     private readonly List<Vector3> locations = [];
     private PointF offset = PointF.Empty;
     private PointF factor = new(1f, 1f);
+    private Point previousMousePosition = Point.Empty;
+    private bool isDraggingMap = false;
+    private SizeF mapSize = new(3778, 3982);
+    private int pointSize = 3;
 
     public Form1()
     {
         InitializeComponent();
         UpdateOffsetAndFactor();
+
+        map.MouseWheel += MapMouseWheel;
+
         worker = new();
         worker.DoWork += WorkerThread;
         worker.WorkerSupportsCancellation = true;
@@ -140,9 +148,9 @@ public partial class Form1 : Form
         Bitmap map = (Bitmap)Resources.map.Clone();
         DrawMarks(map);
 
-        pictureBox1.Image?.Dispose();
-        pictureBox1.Image = map;
-        pictureBox1.Refresh();
+        this.map.Image?.Dispose();
+        this.map.Image = map;
+        this.map.Refresh();
     }
 
     private void DrawMarks(Bitmap img, bool drawCurrentLocations = true)
@@ -165,12 +173,12 @@ public partial class Form1 : Form
         foreach (Vector3 location in tmpLocations)
         {
             Vector3 loc = location;
-            loc.X *= factor.X; 
+            loc.X *= factor.X;
             loc.Z *= factor.Y;
             loc.X += offset.X;
             loc.Z += offset.Y;
 
-            RectangleF point = new(loc.X - 5f, loc.Z - 5f, 10f, 10f);
+            RectangleF point = new(loc.X - pointSize, loc.Z - pointSize, pointSize*2f, pointSize*2f);
             g.FillEllipse(Brushes.Blue, point);
         }
 
@@ -187,7 +195,7 @@ public partial class Form1 : Form
                 loc.X += offset.X;
                 loc.Z += offset.Y;
 
-                RectangleF point = new(loc.X - 10f, loc.Z - 10f, 20f, 20f);
+                RectangleF point = new(loc.X - pointSize*2, loc.Z - pointSize*2, pointSize*4, pointSize*4);
                 g.FillEllipse(Brushes.Red, point);
             }
         }
@@ -250,5 +258,54 @@ public partial class Form1 : Form
     private void TweakValueChanged(object sender, EventArgs e)
     {
         UpdateOffsetAndFactor();
+    }
+
+    private void MapMouseDown(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            isDraggingMap = true;
+            previousMousePosition = MousePosition;
+        }
+    }
+
+    private void MapMouseMove(object sender, MouseEventArgs e)
+    {
+        if (!isDraggingMap)
+        {
+            return;
+        }
+
+        Point currentMousePosition = MousePosition;
+        Point delta = Utils.Subtract(currentMousePosition, previousMousePosition);
+        map.Location = Utils.Addition(map.Location, delta);
+        previousMousePosition = currentMousePosition;
+    }
+
+    private void MapMouseUp(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            isDraggingMap = false;
+        }
+    }
+
+    private void MapMouseWheel(object? sender, MouseEventArgs e)
+    {
+        Point mousePosInControl = map.PointToClient(MousePosition);
+        float scaleFactor = e.Delta > 0 ? 0.8f : 1.2f;
+
+        SizeF newMapSize = Utils.Scale(mapSize, scaleFactor);
+        mapSize = newMapSize;
+        map.Size = mapSize.ToSize();
+
+        Point scaledMousePosInControl = Utils.Scale(mousePosInControl, scaleFactor - 1f);
+        map.Location = Utils.Subtract(map.Location, scaledMousePosInControl);
+    }
+
+    private void PointSizeInput_ValueChanged(object sender, EventArgs e)
+    {
+        pointSize = (int)pointSizeInput.Value;
+        RefreshMap();
     }
 }
