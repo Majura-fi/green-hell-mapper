@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MapperUI;
+﻿namespace MapperUI;
 public static class Utils
 {
     public static Point Subtract(Point a, Point b)

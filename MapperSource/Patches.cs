@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HarmonyLib;
+﻿using HarmonyLib;
 
-namespace MapperSource
+namespace MapperSource;
+
+[HarmonyPatch(typeof(Player), nameof(Player.UpdateMe))]
+public static class Player_UpdateMe_Prefix
 {
-    [HarmonyPatch(typeof(Player), nameof(Player.UpdateMe))]
-    public static class Player_UpdateMe_Prefix
+    [HarmonyPrefix]
+    static void Prefix(Player __instance)
     {
-        [HarmonyPrefix]
-        static void Prefix(Player __instance)
-        {
-            LocationService.Instance.UpdateLocation(
-                __instance.GetInstanceID(),
-                __instance.GetWorldPosition()
-            );
-        }
+        LocationService.Instance.UpdateLocation(
+            __instance.GetInstanceID(),
+            __instance.GetWorldPosition()
+        );
     }
 }

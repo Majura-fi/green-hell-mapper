@@ -3,38 +3,37 @@ using HarmonyLib;
 using MapperSource;
 using static UnityModManagerNet.UnityModManager;
 
-namespace Mapper
+namespace Mapper;
+
+public static class Plugin
 {
-    public static class Plugin
+    private static Harmony? harmony;
+    public static bool Enabled { get; private set; }
+
+    public static bool Load(ModEntry modEntry)
     {
-        private static Harmony? harmony;
-        public static bool Enabled { get; private set; }
+        harmony = new Harmony(modEntry.Info.Id);
+        harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-        public static bool Load(ModEntry modEntry)
+        modEntry.OnToggle = OnToggle;
+        modEntry.Logger.Log("Mapper loaded.");
+        return true;
+    }
+
+    private static bool OnToggle(ModEntry entry, bool enable)
+    {
+        if (enable)
         {
-            harmony = new Harmony(modEntry.Info.Id);
-            harmony.PatchAll(Assembly.GetExecutingAssembly());
-
-            modEntry.OnToggle = OnToggle;
-            modEntry.Logger.Log("Mapper loaded.");
-            return true;
+            LocationService.Instance.Start();
+            entry.Logger.Log("Mapper enabled.");
+        }
+        else
+        {
+            LocationService.Instance.Stop();
+            entry.Logger.Log("Mapper disabled.");
         }
 
-        private static bool OnToggle(ModEntry entry, bool enable)
-        {
-            if (enable)
-            {
-                LocationService.Instance.Start();
-                entry.Logger.Log("Mapper enabled.");
-            }
-            else
-            {
-                LocationService.Instance.Stop();
-                entry.Logger.Log("Mapper disabled.");
-            }
-
-            Enabled = enable;
-            return true;
-        }
+        Enabled = enable;
+        return true;
     }
 }
