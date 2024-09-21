@@ -34,6 +34,8 @@ While orienteering in **Green Hell** is an enjoyable challenge, sometimes you ju
 - Open the Mapper UI software to view your live position on the map.
 - The plugin will automatically log your coordinates in `coordinates.txt`.
 
+![2024-09-21 18_42_20-Green Hell Map](https://github.com/user-attachments/assets/769a0020-67bb-41d1-8a29-57c8ce3fb57e)
+
 ## Compiling the project
 
 Make sure that you add following files to the **MapperSource/Libs** folder or update references to them:
