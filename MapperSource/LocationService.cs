@@ -97,7 +97,9 @@ public class LocationService
 
     private void WriteToFile(string payload)
     {
-        outputStream ??= new("coordinates.txt", FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+        outputStream ??= new(
+            string.Format("coordinates {0}.txt", DateTime.Now.ToString("yyyy-MM-dd HH-mm")), 
+            FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
         outputWriter ??= new(outputStream) {
             AutoFlush = true
         };
