@@ -293,6 +293,12 @@ public partial class Form1 : Form
         Point mousePosInControl = currentMap.PointToClient(MousePosition);
         float scaleFactor = e.Delta > 0 ? 0.8f : 1.2f;
         SizeF newMapSize = Utils.Scale(mapSize, scaleFactor);
+
+        if (newMapSize.Width < 500f || newMapSize.Width > 5000f)
+        {
+            return;
+        }
+
         mapSize = newMapSize;
         currentMap.Size = mapSize.ToSize();
 
