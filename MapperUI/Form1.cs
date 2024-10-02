@@ -11,7 +11,7 @@ namespace MapperUI;
 public partial class Form1 : Form
 {
     private readonly BackgroundWorker? worker;
-    private Dictionary<int, PlayerInfo> playerLocations = [];
+    private readonly Dictionary<int, PlayerInfo> playerLocations = [];
     private readonly List<Vector3> locations = [];
     private PointF offset = PointF.Empty;
     private PointF factor = new(1f, 1f);
@@ -220,7 +220,7 @@ public partial class Form1 : Form
 
     private void LoadCoordinatesMenuClick(object sender, EventArgs e)
     {
-        OpenFileDialog dialog = new() {
+        using OpenFileDialog dialog = new() {
             CheckFileExists = true,
             CheckPathExists = true,
             Multiselect = true
