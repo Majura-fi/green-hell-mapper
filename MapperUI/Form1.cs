@@ -1,12 +1,9 @@
 using System.ComponentModel;
-using System.Drawing.Imaging;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
-using System.Text.Json.Serialization;
 using MapperUI.Properties;
-using Microsoft.VisualBasic.Devices;
 using Newtonsoft.Json;
 
 namespace MapperUI;
@@ -28,7 +25,7 @@ public partial class Form1 : Form
         InitializeComponent();
         UpdateOffsetAndFactor();
 
-        map.MouseWheel += MapMouseWheel;
+        currentMap.MouseWheel += MapMouseWheel;
 
         worker = new();
         worker.DoWork += WorkerThread;
@@ -145,12 +142,13 @@ public partial class Form1 : Form
 
     private void RefreshMap()
     {
+        currentMap.Image?.Dispose();
+        currentMap.Image = null;
+
         Bitmap map = (Bitmap)Resources.map.Clone();
         DrawMarks(map);
-
-        this.map.Image?.Dispose();
-        this.map.Image = map;
-        this.map.Refresh();
+        currentMap.Image = map;
+        currentMap.Refresh();
     }
 
     private void DrawMarks(Bitmap img, bool drawCurrentLocations = true)
@@ -278,7 +276,7 @@ public partial class Form1 : Form
 
         Point currentMousePosition = MousePosition;
         Point delta = Utils.Subtract(currentMousePosition, previousMousePosition);
-        map.Location = Utils.Addition(map.Location, delta);
+        currentMap.Location = Utils.Addition(currentMap.Location, delta);
         previousMousePosition = currentMousePosition;
     }
 
@@ -292,15 +290,14 @@ public partial class Form1 : Form
 
     private void MapMouseWheel(object? sender, MouseEventArgs e)
     {
-        Point mousePosInControl = map.PointToClient(MousePosition);
+        Point mousePosInControl = currentMap.PointToClient(MousePosition);
         float scaleFactor = e.Delta > 0 ? 0.8f : 1.2f;
-
         SizeF newMapSize = Utils.Scale(mapSize, scaleFactor);
         mapSize = newMapSize;
-        map.Size = mapSize.ToSize();
+        currentMap.Size = mapSize.ToSize();
 
         Point scaledMousePosInControl = Utils.Scale(mousePosInControl, scaleFactor - 1f);
-        map.Location = Utils.Subtract(map.Location, scaledMousePosInControl);
+        currentMap.Location = Utils.Subtract(currentMap.Location, scaledMousePosInControl);
     }
 
     private void PointSizeInput_ValueChanged(object sender, EventArgs e)

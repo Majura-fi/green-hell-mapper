@@ -28,7 +28,7 @@ partial class Form1
     /// </summary>
     private void InitializeComponent()
     {
-        map = new PictureBox();
+        currentMap = new PictureBox();
         richTextBox1 = new RichTextBox();
         splitContainer1 = new SplitContainer();
         tableLayoutPanel1 = new TableLayoutPanel();
@@ -46,7 +46,7 @@ partial class Form1
         fileToolStripMenuItem = new ToolStripMenuItem();
         loadCoordinatesToolStripMenuItem = new ToolStripMenuItem();
         quitToolStripMenuItem = new ToolStripMenuItem();
-        ((System.ComponentModel.ISupportInitialize)map).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)currentMap).BeginInit();
         ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
         splitContainer1.Panel1.SuspendLayout();
         splitContainer1.Panel2.SuspendLayout();
@@ -62,16 +62,16 @@ partial class Form1
         // 
         // map
         // 
-        map.Image = Properties.Resources.map;
-        map.Location = new Point(-2, -2);
-        map.Name = "map";
-        map.Size = new Size(3778, 3982);
-        map.SizeMode = PictureBoxSizeMode.Zoom;
-        map.TabIndex = 0;
-        map.TabStop = false;
-        map.MouseDown += MapMouseDown;
-        map.MouseMove += MapMouseMove;
-        map.MouseUp += MapMouseUp;
+        currentMap.Image = Properties.Resources.map;
+        currentMap.Location = new Point(-2, -2);
+        currentMap.Name = "map";
+        currentMap.Size = new Size(3778, 3982);
+        currentMap.SizeMode = PictureBoxSizeMode.Zoom;
+        currentMap.TabIndex = 0;
+        currentMap.TabStop = false;
+        currentMap.MouseDown += MapMouseDown;
+        currentMap.MouseMove += MapMouseMove;
+        currentMap.MouseUp += MapMouseUp;
         // 
         // richTextBox1
         // 
@@ -95,7 +95,7 @@ partial class Form1
         // 
         // splitContainer1.Panel1
         // 
-        splitContainer1.Panel1.Controls.Add(map);
+        splitContainer1.Panel1.Controls.Add(currentMap);
         // 
         // splitContainer1.Panel2
         // 
@@ -276,7 +276,7 @@ partial class Form1
         MainMenuStrip = menuStrip1;
         Name = "Form1";
         Text = "Green Hell Map";
-        ((System.ComponentModel.ISupportInitialize)map).EndInit();
+        ((System.ComponentModel.ISupportInitialize)currentMap).EndInit();
         splitContainer1.Panel1.ResumeLayout(false);
         splitContainer1.Panel2.ResumeLayout(false);
         ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
@@ -296,7 +296,7 @@ partial class Form1
 
     #endregion
 
-    private PictureBox map;
+    private PictureBox currentMap;
     private RichTextBox richTextBox1;
     private SplitContainer splitContainer1;
     private MenuStrip menuStrip1;
