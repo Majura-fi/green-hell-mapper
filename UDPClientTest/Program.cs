@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -30,7 +31,10 @@ async void WorkerThread(object? sender, DoWorkEventArgs e)
                 client.Connect(remote);
             }
 
-            string payloadStr = $"{{ \"PlayerId\": {rnd.Next()}, \"x\": {rnd.NextSingle()}, \"y\": {rnd.NextSingle()}, \"z\": {rnd.NextSingle()} }}";
+            string x = (rnd.NextSingle() * 800f + 400f).ToString("0.000", CultureInfo.InvariantCulture);
+            string y = rnd.NextSingle().ToString("0.000", CultureInfo.InvariantCulture);
+            string z = (rnd.NextSingle() * 1000f + 1400f).ToString("0.000", CultureInfo.InvariantCulture);
+            string payloadStr = $"{{ \"PlayerId\": {rnd.Next(0, 3)}, \"Location\": {{ \"X\": {x}, \"Y\": {y}, \"Z\": {z} }} }}";
             Console.WriteLine(">" + payloadStr);
 
             byte[] payloadBytes = Encoding.ASCII.GetBytes(payloadStr);
