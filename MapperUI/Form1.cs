@@ -144,6 +144,7 @@ public partial class Form1 : Form
     {
         currentMap.Image?.Dispose();
         currentMap.Image = null;
+        GC.Collect();
 
         Bitmap map = (Bitmap)Resources.map.Clone();
         DrawMarks(map);
