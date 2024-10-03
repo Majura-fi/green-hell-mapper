@@ -19,6 +19,9 @@ public partial class Form1 : Form
     private bool isDraggingMap = false;
     private SizeF mapSize = new(3778, 3982);
     private int pointSize = 3;
+    private float zoom = 1f;
+    private static readonly Pen RedPen = new(Color.Red, 5f);
+    private static readonly float RedPenWidth = 2.5f;
 
     public Form1()
     {
@@ -185,6 +188,8 @@ public partial class Form1 : Form
         // red dots on the map.
         if (drawCurrentLocations)
         {
+            float zoomRatio = 1f / zoom;
+            RedPen.Width = RedPenWidth * zoomRatio;
             // Draw current player locations.
             foreach (Vector3 location in tmpPlayerLocations)
             {
@@ -196,6 +201,9 @@ public partial class Form1 : Form
 
                 RectangleF point = new(loc.X - pointSize*2, loc.Z - pointSize*2, pointSize*4, pointSize*4);
                 g.FillEllipse(Brushes.Red, point);
+
+                point = new(loc.X - (20f * zoomRatio), loc.Z - (20f * zoomRatio), (40f * zoomRatio), (40f * zoomRatio));
+                g.DrawEllipse(RedPen, point);
             }
         }
     }
@@ -300,6 +308,7 @@ public partial class Form1 : Form
             return;
         }
 
+        zoom *= scaleFactor;
         mapSize = newMapSize;
         currentMap.Size = mapSize.ToSize();
 
