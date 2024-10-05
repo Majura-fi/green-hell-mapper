@@ -19,7 +19,7 @@ public class LocationService
     private readonly Dictionary<int, PlayerInfo> sentPlayerInfos = [];
     private FileStream? outputStream;
     private StreamWriter? outputWriter;
-
+    private readonly static string coordinatesPath = "./saved-coordinates";
     private LocationService()
     {
     }
@@ -47,6 +47,11 @@ public class LocationService
 
     private void WorkerThread(object sender, DoWorkEventArgs e)
     {
+        if (!Directory.Exists(coordinatesPath))
+        {
+            Directory.CreateDirectory(coordinatesPath);
+        }
+
         MapClient client = new();
         client.Start();
 
@@ -98,8 +103,12 @@ public class LocationService
     private void WriteToFile(string payload)
     {
         outputStream ??= new(
-            string.Format("coordinates {0}.txt", DateTime.Now.ToString("yyyy-MM-dd HH-mm")), 
-            FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read);
+            Path.Combine(
+                coordinatesPath, 
+                string.Format("coordinates {0}.txt", DateTime.Now.ToString("yyyy-MM-dd HH-mm"))
+            ), 
+            FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read
+        );
         outputWriter ??= new(outputStream) {
             AutoFlush = true
         };

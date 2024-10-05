@@ -9,50 +9,34 @@ using Newtonsoft.Json;
 namespace MapperUI;
 
 public partial class Form1 : Form
-{
-    private readonly BackgroundWorker? worker;
-    private readonly Dictionary<int, PlayerInfo> playerLocations = [];
-    private readonly List<Vector3> locations = [];
-    private PointF offset = PointF.Empty;
-    private PointF factor = new(1f, 1f);
-    private Point previousMousePosition = Point.Empty;
-    private bool isDraggingMap = false;
-    private SizeF mapSize = new(3778, 3982);
-    private int pointSize = 3;
-    private float zoom = 1f;
-    private static readonly Pen RedPen = new(Color.Red, 5f);
-    private static readonly float RedPenWidth = 2.5f;
+{   
+    private readonly LocationServer locationServer = new();
+    private readonly static int maxLogLength = 10000;
 
     public Form1()
     {
         InitializeComponent();
-        UpdateOffsetAndFactor();
-
-        currentMap.MouseWheel += MapMouseWheel;
-
-        worker = new();
-        worker.DoWork += WorkerThread;
-        worker.WorkerSupportsCancellation = true;
-        worker.RunWorkerAsync();
+        locationServer.LocationReceived += OnLocationReceived;
+        locationServer.LogProduced += OnLogProduced;
+        locationServer.Start();
 
         FormClosing += (_, _) => {
-            worker.CancelAsync();
+            locationServer.Stop();
         };
+
+        //LoadPreviousCoordinates();
     }
 
-    private void UpdateOffsetAndFactor()
+    private void OnLogProduced(object? sender, string e)
     {
-        try
-        {
-            offset.X = (float)offsetInputX.Value;
-            offset.Y = (float)offsetInputY.Value;
-            factor.X = (float)factorInputX.Value;
-            factor.Y = (float)factorInputY.Value;
-            RefreshMap();
-        }
-        catch (Exception)
-        {
-        }
+        SafeInvoke(() => {
+            AppendLog(e);
+        });
+    }
+
+    private void OnLocationReceived(object? sender, PlayerInfo e)
+    {
+        SafeInvoke(() => { mapControl1.DrawMark(e, true); });
     }
 
     private void LoadCoordinatesFromFile(string path)
@@ -69,143 +53,33 @@ public partial class Form1 : Form
 
                 if (info == null)
                 {
-                    AppendLog(string.Format("Failed to parse json: \"{0}\"", line));
+                    AppendLog($"Failed to parse json: \"{line}\"");
                     continue;
                 }
 
-                locations.Add(info.Location);
+                locationServer.AddLocation(info.Value);
             }
             catch (Exception ex)
             {
-                AppendLog(ex.Message);
+                AppendLog($"[{path}] {ex.Message} - Line: \"{line}\"");
             }
         }
-    }
 
-    private async void WorkerThread(object? sender, DoWorkEventArgs e)
-    {
-        IPEndPoint local = new(IPAddress.Loopback, 11000);
-        IPEndPoint remote = new(IPAddress.Loopback, 11001);
-        using UdpClient client = new();
-        client.Client.Bind(local);
-
-        while (worker != null && !worker.CancellationPending)
-        {
-            try
-            {
-                if (!client.Client.Connected)
-                {
-                    client.Connect(remote);
-                }
-
-                UdpReceiveResult results = await client.ReceiveAsync();
-
-                if (results.Buffer.Length > 0)
-                {
-                    string payloadStr = Encoding.ASCII.GetString(results.Buffer);
-                    PlayerInfo? info = JsonConvert.DeserializeObject<PlayerInfo>(payloadStr);
-
-                    if (info == null)
-                    {
-                        SafeInvoke(() => {
-                            AppendLog(string.Format("Failed to parse json: \"{0}\"", payloadStr));
-                        });
-                        continue;
-                    }
-
-                    lock (playerLocations)
-                    {
-                        if (!playerLocations.TryAdd(info.PlayerId, info))
-                        {
-                            playerLocations[info.PlayerId] = info;
-                        }
-                        locations.Add(info.Location);
-                    }
-
-                    SafeInvoke(() => {
-                        AppendLog(payloadStr);
-                        RefreshMap();
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                SafeInvoke(() => AppendLog(ex.Message));
-                await Task.Delay(1000);
-            }
-        }
+        AppendLog($"Imported {path}");
     }
 
     private void AppendLog(string message)
     {
-        richTextBox1.AppendText(message + Environment.NewLine);
+        string contents = $"{richTextBox1.Text}{message}{Environment.NewLine}";
+        
+        if (contents.Length > maxLogLength)
+        {
+            contents = contents[^maxLogLength..];
+        }
+
+        richTextBox1.Text = contents;
         richTextBox1.SelectionStart = richTextBox1.TextLength;
         richTextBox1.ScrollToCaret();
-    }
-
-    private void RefreshMap()
-    {
-        currentMap.Image?.Dispose();
-        currentMap.Image = null;
-        GC.Collect();
-
-        Bitmap map = (Bitmap)Resources.map.Clone();
-        DrawMarks(map);
-        currentMap.Image = map;
-        currentMap.Refresh();
-    }
-
-    private void DrawMarks(Bitmap img, bool drawCurrentLocations = true)
-    {
-        using Graphics g = Graphics.FromImage(img);
-
-        List<Vector3> tmpPlayerLocations;
-        Vector3[] tmpLocations;
-
-        // Grab a copy so that we don't run into problems when the collection
-        // changes.
-        lock (playerLocations)
-        {
-            tmpLocations = [.. locations];
-            tmpPlayerLocations = playerLocations
-                .Select(pair => pair.Value.Location).ToList();
-        }
-
-        // Draw history locations.
-        foreach (Vector3 location in tmpLocations)
-        {
-            Vector3 loc = location;
-            loc.X *= factor.X;
-            loc.Z *= factor.Y;
-            loc.X += offset.X;
-            loc.Z += offset.Y;
-
-            RectangleF point = new(loc.X - pointSize, loc.Z - pointSize, pointSize*2f, pointSize*2f);
-            g.FillEllipse(Brushes.Blue, point);
-        }
-
-        // These are already included in the tmpLocations, but drawn with
-        // red dots on the map.
-        if (drawCurrentLocations)
-        {
-            float zoomRatio = 1f / zoom;
-            RedPen.Width = RedPenWidth * zoomRatio;
-            // Draw current player locations.
-            foreach (Vector3 location in tmpPlayerLocations)
-            {
-                Vector3 loc = location;
-                loc.X *= factor.X;
-                loc.Z *= factor.Y;
-                loc.X += offset.X;
-                loc.Z += offset.Y;
-
-                RectangleF point = new(loc.X - pointSize*2, loc.Z - pointSize*2, pointSize*4, pointSize*4);
-                g.FillEllipse(Brushes.Red, point);
-
-                point = new(loc.X - (20f * zoomRatio), loc.Z - (20f * zoomRatio), (40f * zoomRatio), (40f * zoomRatio));
-                g.DrawEllipse(RedPen, point);
-            }
-        }
     }
 
     private void SafeInvoke(Action action)
@@ -223,6 +97,17 @@ public partial class Form1 : Form
         }
         catch (Exception)
         {
+        }
+    }
+
+    private void LoadPreviousCoordinates()
+    {
+        DirectoryInfo srcDir = new(@"C:\Program Files (x86)\Steam\steamapps\common\Green Hell\SavedCoordinates");
+        IEnumerable<FileInfo> files = srcDir.EnumerateFiles("*.*", SearchOption.TopDirectoryOnly);
+
+        foreach (FileInfo file in files)
+        {
+            LoadCoordinatesFromFile(file.FullName);
         }
     }
 
@@ -254,7 +139,6 @@ public partial class Form1 : Form
         {
             LoadCoordinatesFromFile(path);
         }
-        RefreshMap();
     }
 
     private void QuitMenuClick(object sender, EventArgs e)
@@ -262,63 +146,8 @@ public partial class Form1 : Form
         Close();
     }
 
-    private void TweakValueChanged(object sender, EventArgs e)
-    {
-        UpdateOffsetAndFactor();
-    }
-
-    private void MapMouseDown(object sender, MouseEventArgs e)
-    {
-        if (e.Button == MouseButtons.Left)
-        {
-            isDraggingMap = true;
-            previousMousePosition = MousePosition;
-        }
-    }
-
-    private void MapMouseMove(object sender, MouseEventArgs e)
-    {
-        if (!isDraggingMap)
-        {
-            return;
-        }
-
-        Point currentMousePosition = MousePosition;
-        Point delta = Utils.Subtract(currentMousePosition, previousMousePosition);
-        currentMap.Location = Utils.Addition(currentMap.Location, delta);
-        previousMousePosition = currentMousePosition;
-    }
-
-    private void MapMouseUp(object sender, MouseEventArgs e)
-    {
-        if (e.Button == MouseButtons.Left)
-        {
-            isDraggingMap = false;
-        }
-    }
-
-    private void MapMouseWheel(object? sender, MouseEventArgs e)
-    {
-        Point mousePosInControl = currentMap.PointToClient(MousePosition);
-        float scaleFactor = e.Delta > 0 ? 0.8f : 1.2f;
-        SizeF newMapSize = Utils.Scale(mapSize, scaleFactor);
-
-        if (newMapSize.Width < 500f || newMapSize.Width > 5000f)
-        {
-            return;
-        }
-
-        zoom *= scaleFactor;
-        mapSize = newMapSize;
-        currentMap.Size = mapSize.ToSize();
-
-        Point scaledMousePosInControl = Utils.Scale(mousePosInControl, scaleFactor - 1f);
-        currentMap.Location = Utils.Subtract(currentMap.Location, scaledMousePosInControl);
-    }
-
     private void PointSizeInput_ValueChanged(object sender, EventArgs e)
     {
-        pointSize = (int)pointSizeInput.Value;
-        RefreshMap();
+        // pointSize = (int)pointSizeInput.Value;
     }
 }

@@ -45,7 +45,7 @@ async void WorkerThread(object? sender, DoWorkEventArgs e)
             Console.WriteLine(ex.Message);
         }
 
-        await Task.Delay(1000);
+        await Task.Delay(50);
     }
 }
 
