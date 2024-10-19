@@ -14,9 +14,6 @@ internal class LocationServer
     private BackgroundWorker? worker;
     private readonly List<Vector3> locations = [];
 
-    private static readonly PointF offset = new(-108f, 5310f);
-    private static readonly PointF factor = new(2.53f, -2.74f);
-
     public LocationServer() 
     {
     }
@@ -105,14 +102,8 @@ internal class LocationServer
             PlayerId = info.PlayerId,
             Location = info.Location,
             Forward = info.Forward,
-            MapLocation = info.MapLocation = new(
-                (info.Location.X * factor.X) + offset.X,
-                (info.Location.Z * factor.Y) + offset.Y
-            ),
-            MapForward = Vector2.Normalize(new(
-                info.Forward.X,
-                -info.Forward.Z
-            ))
+            MapLocation = CoordinatesConverter.GameCoordinatesToMapCoordinates(info.Location),
+            MapForward = CoordinatesConverter.GameForwardToMapForward(info.Forward),
         };
     }
 

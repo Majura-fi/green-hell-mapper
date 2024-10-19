@@ -139,6 +139,12 @@ public partial class MapControl : UserControl
             }
         }
 
+        g.ResetTransform();
+
+        if (isMouseOver)
+        {
+            DrawMouseLocation(g);
+        }
     }
 
     private static void DrawViewCone(Graphics g, PlayerInfo info)
@@ -169,6 +175,51 @@ public partial class MapControl : UserControl
         return vectors.Select(v => new PointF(v.X, v.Y)).ToArray();
     }
 
+    private void DrawMouseLocation(Graphics g)
+    {
+        PointF m = PointToClient(MousePosition);
+
+        Vector2 mapCoordinates = new(
+            (m.X / currentZoom) - offset.X, 
+            (m.Y / currentZoom) - offset.Y
+        );
+        Vector3 gameCoords = CoordinatesConverter.MapCoordinatesToGameCoordinates(mapCoordinates);
+
+        // Horizontal
+        g.DrawLine(Pens.Red, 0, m.Y, Width, m.Y);
+
+        // Vertical
+        g.DrawLine(Pens.Red, m.X, 0, m.X, Height);
+
+        // W 55 =>   63,24
+        // W 54 =>  103,95
+        // W 21 => 1514,63
+        // S 13 => 1918,61
+        // S 51 =>  504,01
+        // Width   1451,39
+        // Height  1414,60
+        float tileSize = 40.71f;
+        float w = (1414.60f - gameCoords.X) / tileSize;
+        float s = (1414.60f - gameCoords.Z) / tileSize;
+
+        string coords = $"W: ? - S: ?\n" +
+            $"Game coords: [{gameCoords.X:0.00}, {gameCoords.Z:0.00}]\n" +
+            $"Mouse control pos: [{m.X:0.00}, {m.Y:0.00}]\n" +
+            $"Offset: [{offset.X:0.00}, {offset.Y:0.00}]\n" +
+            $"Zoom: {currentZoom:0.00}";
+        SizeF size = g.MeasureString(coords, font);
+
+        g.FillRectangle(
+            Brushes.White,
+            new RectangleF(
+                10,
+                Height - size.Height - 2,
+                size.Width,
+                size.Height
+            )
+        );
+        g.DrawString(coords, font, Brushes.Black, new PointF(10, Height - size.Height));
+    }
 
     private void DrawLocation(Graphics g, PlayerInfo info)
     {
