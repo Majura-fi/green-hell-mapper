@@ -97,18 +97,22 @@ internal class LocationServer
         }
     }
 
-    private static PlayerInfo PopulateMapLocation(PlayerInfo info)
+    public static PlayerInfo PopulateMapLocation(PlayerInfo info)
     {
         // Apply scale and offset for the location.
         // Note that Z and Y is swapped around.
         return new() {
             PlayerId = info.PlayerId,
             Location = info.Location,
+            Forward = info.Forward,
             MapLocation = info.MapLocation = new(
                 (info.Location.X * factor.X) + offset.X,
-                (info.Location.Z * factor.Y) + offset.Y,
-                info.Location.Y
-            )
+                (info.Location.Z * factor.Y) + offset.Y
+            ),
+            MapForward = Vector2.Normalize(new(
+                info.Forward.X,
+                -info.Forward.Z
+            ))
         };
     }
 
