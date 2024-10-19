@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -29,11 +30,11 @@ public partial class MapControl : UserControl
     private readonly Dictionary<int, PlayerInfo> latestLocations = [];
 
     private PointF offset;
-
-
     private Point previousMousePosition = Point.Empty;
     private bool isDraggingMap = false;
+    private bool isMouseOver = false;
 
+    private readonly static Font font = new(new FontFamily("Times New Roman"), 12, FontStyle.Regular, GraphicsUnit.Pixel);
 
     public MapControl()
     {
@@ -44,8 +45,20 @@ public partial class MapControl : UserControl
         MouseDown += OnMouseDown;
         MouseMove += OnMouseMove;
         MouseUp += OnMouseUp;
+        MouseEnter += OnMouseEnter;
+        MouseLeave += OnMouseLeave;
 
         offset = new(0, 0);
+    }
+
+    private void OnMouseLeave(object? sender, EventArgs e)
+    {
+        isMouseOver = false;
+    }
+
+    private void OnMouseEnter(object? sender, EventArgs e)
+    {
+        isMouseOver = true;
     }
 
     private void OnMouseWheel(object? sender, MouseEventArgs e)
@@ -76,21 +89,23 @@ public partial class MapControl : UserControl
 
     private void OnMouseMove(object? sender, MouseEventArgs e)
     {
-        if (!isDraggingMap)
+        if (isDraggingMap)
         {
-            return;
-        }
-
-        Point delta = new(
-            e.Location.X - previousMousePosition.X,
-            e.Location.Y - previousMousePosition.Y
-        );
+            Point delta = new(
+                e.Location.X - previousMousePosition.X,
+                e.Location.Y - previousMousePosition.Y
+            );
         
-        offset.X += delta.X / currentZoom;
-        offset.Y += delta.Y / currentZoom;
+            offset.X += delta.X / currentZoom;
+            offset.Y += delta.Y / currentZoom;
 
-        previousMousePosition = e.Location;
-        Invalidate();
+            previousMousePosition = e.Location;
+            Invalidate();
+        } 
+        else if (isMouseOver)
+        {
+            Invalidate();
+        }
     }
 
     private void OnMouseUp(object? sender, MouseEventArgs e)
@@ -108,44 +123,70 @@ public partial class MapControl : UserControl
         g.TranslateTransform(offset.X, offset.Y);
         g.DrawImage(map, 0, 0, map.Width, map.Height);
 
-        g.DrawLine(
-            RedPen, 
-            PointF.Empty, 
-            new PointF(
-                map.Width * 0.5f,
-                map.Height * 0.5f
-            )
-        );
-
         if (DrawCurrentLocations)
         {
-            Vector3[] tmpLatestLocations;
+            PlayerInfo[] tmpLatestInfos;
             lock (latestLocations)
             {
-                tmpLatestLocations = latestLocations
-                    .Select(i => i.Value.MapLocation)
-                    .ToArray();
+                tmpLatestInfos = latestLocations.Select(p => p.Value).ToArray();
             }
 
             // Draw current player locations.
-            foreach (Vector3 location in tmpLatestLocations)
+            foreach (PlayerInfo info in tmpLatestInfos)
             {
-                RectangleF point = new(
-                    (location.X - PointSize * 2f), 
-                    (location.Y - PointSize * 2f), 
-                    PointSize * 4f, 
-                    PointSize * 4f
-                );
-                g.FillEllipse(Brushes.Red, point);
-
-                point = new(
-                    (location.X - 20f), 
-                    (location.Y - 20f), 
-                    40f, 
-                    40f);
-                g.DrawEllipse(RedPen, point);
+                DrawLocation(g, info);
+                DrawViewCone(g, info);
             }
         }
+
+    }
+
+    private static void DrawViewCone(Graphics g, PlayerInfo info)
+    {
+        float angle = MathF.Atan2(info.MapForward.X, info.MapForward.Y);
+
+        PointF[] points = VectorsToPointArray(
+            info.MapLocation,
+            // Left edge
+            MathUtils.MoveAlongAngle(info.MapLocation, angle - MathUtils.Deg2Rad(45f), 100f),
+            // Right edge
+            MathUtils.MoveAlongAngle(info.MapLocation, angle + MathUtils.Deg2Rad(45f), 100f)
+        );
+
+        using GraphicsPath path = new();
+        path.AddPolygon(points);
+
+        using PathGradientBrush viewConeBrush = new(path);
+        viewConeBrush.CenterPoint = points[0];
+        viewConeBrush.CenterColor = Color.FromArgb(127, 255, 255, 0);
+        viewConeBrush.SurroundColors = [ Color.FromArgb(0, 255, 255, 0) ];
+
+        g.FillPath(viewConeBrush, path);
+    }
+
+    private static PointF[] VectorsToPointArray(params Vector2[] vectors)
+    {
+        return vectors.Select(v => new PointF(v.X, v.Y)).ToArray();
+    }
+
+
+    private void DrawLocation(Graphics g, PlayerInfo info)
+    {
+        RectangleF point = new(
+                            info.MapLocation.X - PointSize * 2f,
+                            info.MapLocation.Y - PointSize * 2f,
+                            PointSize * 4f,
+                            PointSize * 4f
+                        );
+        g.FillEllipse(Brushes.Red, point);
+
+        point = new(
+            info.MapLocation.X - 20f,
+            info.MapLocation.Y - 20f,
+            40f,
+            40f
+        );
+        g.DrawEllipse(RedPen, point);
     }
 
     /// <summary>
