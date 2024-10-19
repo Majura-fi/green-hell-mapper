@@ -24,11 +24,11 @@ public class LocationService
     {
     }
 
-    public void UpdateLocation(int playerId, Vector3 location)
+    public void UpdateLocation(int playerId, Vector3 location, Vector3 rotation)
     {
-        if (!playerInfos.TryAdd(playerId, new(playerId, location)))
+        if (!playerInfos.TryAdd(playerId, new(playerId, location, rotation)))
         {
-            playerInfos[playerId] = new(playerId, location);
+            playerInfos[playerId] = new(playerId, location, rotation);
         }
     }
 

@@ -10,8 +10,9 @@ public static class Player_UpdateMe_Prefix
     static void Prefix(Player __instance)
     {
         LocationService.Instance.UpdateLocation(
-            0,
-            __instance.GetWorldPosition()
+            __instance.GetInstanceID(),
+            __instance.GetWorldPosition(),
+            __instance.GetCamTransform().forward
         );
     }
 }
@@ -29,7 +30,8 @@ public static class ReplicatedLogicalPlayer_Update
     {
         LocationService.Instance.UpdateLocation(
             __instance.GetInstanceID(),
-            __instance.GetWorldPosition()
+            __instance.GetWorldPosition(),
+            __instance.transform.forward
         );
     }
 }
