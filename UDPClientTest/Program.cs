@@ -2,7 +2,9 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
+using System.Numerics;
 using System.Text;
+using UDPClientTest;
 
 BackgroundWorker worker = new();
 worker.DoWork += WorkerThread;
@@ -20,7 +22,12 @@ async void WorkerThread(object? sender, DoWorkEventArgs e)
     using UdpClient client = new();
     client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
     client.Client.Bind(local);
-    Random rnd = new();
+
+    List<SimulatedPlayer> players = [];
+    for (int i = 0; i < 5; i++)
+    {
+        players.Add(new(i));
+    }
 
     while (worker != null && !worker.CancellationPending)
     {
@@ -31,14 +38,15 @@ async void WorkerThread(object? sender, DoWorkEventArgs e)
                 client.Connect(remote);
             }
 
-            string x = (rnd.NextSingle() * 800f + 400f).ToString("0.000", CultureInfo.InvariantCulture);
-            string y = rnd.NextSingle().ToString("0.000", CultureInfo.InvariantCulture);
-            string z = (rnd.NextSingle() * 1000f + 1400f).ToString("0.000", CultureInfo.InvariantCulture);
-            string payloadStr = $"{{ \"PlayerId\": {rnd.Next(0, 3)}, \"Location\": {{ \"X\": {x}, \"Y\": {y}, \"Z\": {z} }} }}";
-            Console.WriteLine(">" + payloadStr);
+            foreach (SimulatedPlayer player in players)
+            {
+                player.Update();
+                string payloadStr = player.ToJSON();
+                Console.WriteLine(">" + payloadStr);
 
-            byte[] payloadBytes = Encoding.ASCII.GetBytes(payloadStr);
-            await client.SendAsync(payloadBytes, payloadBytes.Length);
+                byte[] payloadBytes = Encoding.ASCII.GetBytes(payloadStr);
+                await client.SendAsync(payloadBytes, payloadBytes.Length);
+            }
         }
         catch (Exception ex)
         {
