@@ -155,7 +155,9 @@ function New-ModRelease {
     }
 
     Add-Type -Assembly "System.IO.Compression.FileSystem"
-    [System.IO.Compression.ZipFile]::CreateFromDirectory($outputPath, $outputZipPath)
+    $compressionLevel = 0
+    $includeBaseDirectory = $true
+    [System.IO.Compression.ZipFile]::CreateFromDirectory($outputPath, $outputZipPath, $compressionLevel, $includeBaseDirectory)
 
     Write-Host "Release zip created: $outputZipPath"
     return New-Object PSObject -Property @{
