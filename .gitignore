@@ -19,3 +19,5 @@ Mapper/Libs/UnityModManager.dll
 MapperUI/Assets/Images/.map.png-autosave.kra
 /Mapper/Releases
 /Mapper/Releases_Debug
+/MapperUI/Releases
+/MapperUI/Releases_Debug

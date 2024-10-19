@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <Version>1.5.0</Version>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -39,4 +40,9 @@
     </None>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="if exist after-debug-build.ps1 powershell.exe -ExecutionPolicy Bypass -File after-debug-build.ps1" Condition="'$(Configuration)' == 'Debug'" />
+      <Exec Command="if exist after-release-build.ps1 powershell.exe -ExecutionPolicy Bypass -File after-release-build.ps1" Condition="'$(Configuration)' == 'Release'" />
+  </Target>
+    
 </Project>
