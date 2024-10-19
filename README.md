@@ -5,6 +5,7 @@ This project is a Unity Mod Manager plugin for the game **Green Hell**, designed
 ## Features
 
 - **Live Location Tracking:** Sends player's current location to an external UI software every 100ms.
+- **View cone:** Along with the location data is sent player's forward vector, indicating which direction player is looking at.
 - **Efficient Updates:** Location is only sent if the player has moved at least 1 meter from the previous recorded position.
 - **Interactive Map:** The UI software supports panning and zooming to explore the map. No map markers at the moment as the only intent was to display the current location.
 - **Movement History:** The map displays where the player has been.
@@ -34,7 +35,7 @@ While orienteering in **Green Hell** is an enjoyable challenge, sometimes you ju
 - Open the Mapper UI software to view your live position on the map.
 - The plugin will automatically log your coordinates in `coordinates.txt`.
 
-![2024-09-21 18_42_20-Green Hell Map](https://github.com/user-attachments/assets/769a0020-67bb-41d1-8a29-57c8ce3fb57e)
+![Mapper](https://github.com/user-attachments/assets/a2aa21fd-7499-40cf-947a-a8ac254942ae)
 
 ## Compiling the project
 
