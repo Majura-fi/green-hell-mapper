@@ -62,9 +62,18 @@ internal class LocationServer
                 if (results.Buffer.Length > 0)
                 {
                     string payloadStr = Encoding.ASCII.GetString(results.Buffer);
-                    PlayerInfo? info = JsonConvert.DeserializeObject<PlayerInfo>(payloadStr);
+                    PlayerInfo? info;
 
-                    if (info == null)
+                    try
+                    {
+                        info = JsonConvert.DeserializeObject<PlayerInfo>(payloadStr);
+                        if (info == null)
+                        {
+                            LogProduced(this, string.Format("Failed to parse json: \"{0}\"", payloadStr));
+                            continue;
+                        }
+                    }
+                    catch (Exception)
                     {
                         LogProduced(this, string.Format("Failed to parse json: \"{0}\"", payloadStr));
                         continue;
