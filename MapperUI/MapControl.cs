@@ -191,18 +191,10 @@ public partial class MapControl : UserControl
         // Vertical
         g.DrawLine(Pens.Red, m.X, 0, m.X, Height);
 
-        // W 55 =>   63,24
-        // W 54 =>  103,95
-        // W 21 => 1514,63
-        // S 13 => 1918,61
-        // S 51 =>  504,01
-        // Width   1451,39
-        // Height  1414,60
-        float tileSize = 40.71f;
-        float w = (1414.60f - gameCoords.X) / tileSize;
-        float s = (1414.60f - gameCoords.Z) / tileSize;
+        float w = MathF.Round(((1414.60f - gameCoords.X) / 41.3928023685f) + 22.453f, 1);
+        float s = MathF.Round(((1414.60f - gameCoords.Z) / 37.1801052686f) + 26.5f, 1);
 
-        string coords = $"W: ? - S: ?\n" +
+        string coords = $"W: {w} - S: {s}\n" +
             $"Game coords: [{gameCoords.X:0.00}, {gameCoords.Z:0.00}]\n" +
             $"Mouse control pos: [{m.X:0.00}, {m.Y:0.00}]\n" +
             $"Offset: [{offset.X:0.00}, {offset.Y:0.00}]\n" +
