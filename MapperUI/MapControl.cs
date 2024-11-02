@@ -191,14 +191,10 @@ public partial class MapControl : UserControl
         // Vertical
         g.DrawLine(Pens.Red, m.X, 0, m.X, Height);
 
-        float w = MathF.Round(((1414.60f - gameCoords.X) / 40.33472222f) + 22.49244f, 6);
-        float s = MathF.Round(((1414.60f - gameCoords.Z) / 37.24315789f) + 26.54626f, 6);
+        float w = ((1414.60f - gameCoords.X) / 40.33472222f) + 22.49244f;
+        float s = ((1414.60f - gameCoords.Z) / 37.24315789f) + 26.54626f;
 
-        string coords = $"W: {w} - S: {s}\n" +
-            $"Game coords: [{gameCoords.X:0.00}, {gameCoords.Z:0.00}]\n" +
-            $"Mouse control pos: [{m.X:0.00}, {m.Y:0.00}]\n" +
-            $"Offset: [{offset.X:0.00}, {offset.Y:0.00}]\n" +
-            $"Zoom: {currentZoom:0.00}";
+        string coords = $"W: {w:0.0} - S: {s:0.0}\nGame coords: [{gameCoords.X:0.00}, {gameCoords.Z:0.00}]";
         SizeF size = g.MeasureString(coords, font);
 
         g.FillRectangle(
