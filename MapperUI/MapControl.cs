@@ -191,8 +191,8 @@ public partial class MapControl : UserControl
         // Vertical
         g.DrawLine(Pens.Red, m.X, 0, m.X, Height);
 
-        float w = MathF.Round(((1414.60f - gameCoords.X) / 41.3928023685f) + 22.453f, 1);
-        float s = MathF.Round(((1414.60f - gameCoords.Z) / 37.1801052686f) + 26.5f, 1);
+        float w = MathF.Round(((1414.60f - gameCoords.X) / 40.33472222f) + 22.49244f, 6);
+        float s = MathF.Round(((1414.60f - gameCoords.Z) / 37.24315789f) + 26.54626f, 6);
 
         string coords = $"W: {w} - S: {s}\n" +
             $"Game coords: [{gameCoords.X:0.00}, {gameCoords.Z:0.00}]\n" +
@@ -216,11 +216,11 @@ public partial class MapControl : UserControl
     private void DrawLocation(Graphics g, PlayerInfo info)
     {
         RectangleF point = new(
-                            info.MapLocation.X - PointSize * 2f,
-                            info.MapLocation.Y - PointSize * 2f,
-                            PointSize * 4f,
-                            PointSize * 4f
-                        );
+            info.MapLocation.X - PointSize * 2f,
+            info.MapLocation.Y - PointSize * 2f,
+            PointSize * 4f,
+            PointSize * 4f
+        );
         g.FillEllipse(Brushes.Red, point);
 
         point = new(
