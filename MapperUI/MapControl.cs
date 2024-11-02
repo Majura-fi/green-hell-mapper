@@ -20,12 +20,10 @@ public partial class MapControl : UserControl
     private Bitmap map = (Bitmap)Resources.map.Clone();
 
     private float currentZoom = 1f;
-    private readonly float zoomStep = 0.1f;
     private readonly float zoomMin = 0.2f;
     private readonly float zoomMax = 4f;
 
     private static readonly Pen RedPen = new(Color.Red, 5f);
-    private static readonly float RedPenWidth = 2.5f;
 
     private readonly Dictionary<int, PlayerInfo> latestLocations = [];
 
