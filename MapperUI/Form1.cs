@@ -3,15 +3,17 @@ using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Text;
+using System.Windows.Forms;
 using MapperUI.Properties;
 using Newtonsoft.Json;
 
 namespace MapperUI;
 
 public partial class Form1 : Form
-{   
+{
     private readonly LocationServer locationServer = new();
-    private readonly static int maxLogLength = 10000;
+    private SettingsForm? settingsForm;
+    private LogsForm? logsForm;
 
     public Form1()
     {
@@ -22,6 +24,8 @@ public partial class Form1 : Form
 
         FormClosing += (_, _) => {
             locationServer.Stop();
+            logsForm?.Close();
+            settingsForm?.Close();
         };
 
         //LoadPreviousCoordinates();
@@ -29,9 +33,7 @@ public partial class Form1 : Form
 
     private void OnLogProduced(object? sender, string e)
     {
-        SafeInvoke(() => {
-            AppendLog(e);
-        });
+        SafeInvoke(() => logsForm?.AppendLog(e));
     }
 
     private void OnLocationReceived(object? sender, PlayerInfo e)
@@ -53,7 +55,7 @@ public partial class Form1 : Form
 
                 if (info == null)
                 {
-                    AppendLog($"Failed to parse json: \"{line}\"");
+                    logsForm?.AppendLog($"Failed to parse json: \"{line}\"");
                     continue;
                 }
 
@@ -61,25 +63,11 @@ public partial class Form1 : Form
             }
             catch (Exception ex)
             {
-                AppendLog($"[{path}] {ex.Message} - Line: \"{line}\"");
+                logsForm?.AppendLog($"[{path}] {ex.Message} - Line: \"{line}\"");
             }
         }
 
-        AppendLog($"Imported {path}");
-    }
-
-    private void AppendLog(string message)
-    {
-        string contents = $"{richTextBox1.Text}{message}{Environment.NewLine}";
-        
-        if (contents.Length > maxLogLength)
-        {
-            contents = contents[^maxLogLength..];
-        }
-
-        richTextBox1.Text = contents;
-        richTextBox1.SelectionStart = richTextBox1.TextLength;
-        richTextBox1.ScrollToCaret();
+        logsForm?.AppendLog($"Imported {path}");
     }
 
     private void SafeInvoke(Action action)
@@ -146,8 +134,29 @@ public partial class Form1 : Form
         Close();
     }
 
-    private void PointSizeInput_ValueChanged(object sender, EventArgs e)
+    private void SettingsToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        // pointSize = (int)pointSizeInput.Value;
+        settingsForm ??= new(Program.Settings!);
+        settingsForm.FormClosing += SettingsForm_FormClosing;
+        settingsForm.Show();
+    }
+
+    private void SettingsForm_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        settingsForm!.FormClosing -= SettingsForm_FormClosing;
+        settingsForm = null;
+    }
+
+    private void ShowLogsToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        logsForm ??= new();
+        logsForm.FormClosing += LogsForm_FormClosing;
+        logsForm.Show();
+    }
+
+    private void LogsForm_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        logsForm!.FormClosing -= LogsForm_FormClosing;
+        logsForm = null;
     }
 }
